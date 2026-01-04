@@ -34,24 +34,12 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 56.25vw;
+            min-height: 100vh;
+            min-width: 177.77vh;
             transform: translate(-50%, -50%);
             pointer-events: none;
-        }
-        
-        @media (aspect-ratio > 16/9) {
-            .video-background iframe {
-                width: 100%;
-                height: calc(100vw * 9 / 16);
-            }
-        }
-        
-        @media (aspect-ratio < 16/9) {
-            .video-background iframe {
-                width: calc(100vh * 16 / 9);
-                height: 100%;
-            }
         }
 
         .video-overlay {
@@ -677,10 +665,9 @@
 </head>
 <body>
     <div class="video-background" id="videoBackground">
-        <!-- YouTube video embedded as background -->
         <iframe
             id="rustVideo"
-            src="https://www.youtube.com/embed/fgpNHkwOBi4?autoplay=1&mute=1&loop=1&playlist=fgpNHkwOBi4&controls=0"
+            src="https://www.youtube.com/embed/fgpNHkwOBi4?autoplay=1&mute=1&loop=1&playlist=fgpNHkwOBi4&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3"
             frameborder="0"
             allow="autoplay; encrypted-media"
             allowfullscreen>
@@ -688,7 +675,7 @@
     </div>
     <div class="video-overlay"></div>
 
-    <div class="copyright">© 2026 https://lovinjacheat-58651290-d900e.web.app/ - All Rights Reserved</div>
+    <div class="copyright">© 2026 LovinjaCheat - All Rights Reserved</div>
 
     <div class="burger" id="burger">
         <span></span>
@@ -765,24 +752,13 @@
             <h2 id="modalTitle">Credits</h2>
             
             <div id="modalContent">
-                <!-- Content will be dynamically inserted here -->
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURATION - Update these with your Discord info
-        // NOTE: changed to the invite provided by the user so Buy opens this server
         const discordServer = 'https://discord.gg/SKZgPYdD';
-        const ticketChannelId = '1457043834675531919'; // The channel where ticket buttons are
-        
-        // For direct ticket links (if your bot supports URL parameters)
-        // No direct ticket channel links are configured; Buy will open the invite directly
-        // (ticketUrls removed so the invite always goes to the server join prompt)
-
-        // Video background management - YouTube embed
-        // No additional JavaScript needed for YouTube embed
-        // The video will auto-play, loop, and be muted
+        const ticketChannelId = '1457043834675531919';
 
         const productData = {
             key: {
@@ -889,407 +865,4 @@
         function addMessage(text, isBot = true, typed = false) {
             const chatMessages = document.getElementById('chatMessages');
             const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isBot ? 'bot' : 'user'}`;
-            
-            if (typed && isBot) {
-                if (text.includes('<ticketlink>')) {
-                    const parts = text.split(/<ticketlink[^>]*>|<\/ticketlink>/);
-                    const matches = text.match(/<ticketlink[^>]*>(.*?)<\/ticketlink>/g);
-                    
-                    chatMessages.appendChild(messageDiv);
-                    
-                    return new Promise(async (resolve) => {
-                        for (let i = 0; i < parts.length; i++) {
-                            if (parts[i]) {
-                                await typeMessage(messageDiv, parts[i], 15, true);
-                            }
-                            if (matches && matches[i]) {
-                                const productMatch = matches[i].match(/data-product='([^']+)'/);
-                                const linkText = matches[i].match(/<ticketlink[^>]*>(.*?)<\/ticketlink>/)[1];
-                                const link = document.createElement('span');
-                                link.className = 'ticket-link';
-                                link.textContent = linkText;
-                                if (productMatch) {
-                                    link.setAttribute('data-product', productMatch[1]);
-                                }
-                                link.onclick = function() {
-                                    openTicket(this.getAttribute('data-product'));
-                                };
-                                messageDiv.appendChild(link);
-                            }
-                        }
-                        chatMessages.scrollTop = chatMessages.scrollHeight;
-                        resolve();
-                    });
-                } else {
-                    chatMessages.appendChild(messageDiv);
-                    return typeMessage(messageDiv, text, 15);
-                }
-            } else {
-                messageDiv.textContent = text;
-                chatMessages.appendChild(messageDiv);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                return Promise.resolve();
-            }
-        }
-
-        function typeMessage(element, text, delay = 15, append = false) {
-            return new Promise((resolve) => {
-                let i = 0;
-                if (!append) element.textContent = '';
-                const currentText = element.textContent;
-                const typing = setInterval(() => {
-                    if (i < text.length) {
-                        element.textContent = currentText + text.substring(0, i + 1);
-                        i++;
-                        const chatMessages = document.getElementById('chatMessages');
-                        chatMessages.scrollTop = chatMessages.scrollHeight;
-                    } else {
-                        clearInterval(typing);
-                        resolve();
-                    }
-                }, delay);
-            });
-        }
-
-        function showTyping() {
-            const chatMessages = document.getElementById('chatMessages');
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'typing-indicator';
-            typingDiv.id = 'currentTyping';
-            typingDiv.innerHTML = `
-                <div class="typing-dots">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-            `;
-            chatMessages.appendChild(typingDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            
-            setTimeout(() => {
-                typingDiv.classList.add('active');
-            }, 10);
-        }
-
-        function hideTyping() {
-            const typingDiv = document.getElementById('currentTyping');
-            if (typingDiv) {
-                typingDiv.classList.remove('active');
-                setTimeout(() => typingDiv.remove(), 300);
-            }
-        }
-
-        function getRandomDelay() {
-            return Math.floor(Math.random() * (20000 - 5000 + 1)) + 5000;
-        }
-
-        function getBotResponse(userMessage) {
-            const message = userMessage.toLowerCase();
-            const sanitized = message.replace(/<[^>]*>/g, '');
-            
-            if (sanitized.includes('hello') || sanitized.includes('hi') || sanitized.includes('hey')) {
-                return supportResponses.greeting[Math.floor(Math.random() * supportResponses.greeting.length)];
-            } else if (sanitized.includes('ticket') || sanitized.includes('support ticket') || sanitized.includes('create ticket')) {
-                return supportResponses.ticket[Math.floor(Math.random() * supportResponses.ticket.length)];
-            } else if (sanitized.includes('source key') || sanitized.includes('sourcekey') || sanitized.includes('get key') || sanitized.includes('buy key')) {
-                return supportResponses.sourcekey[Math.floor(Math.random() * supportResponses.sourcekey.length)];
-            } else if (sanitized.includes('source script') || sanitized.includes('sourcescript') || sanitized.includes('get script') || sanitized.includes('buy script')) {
-                return supportResponses.sourcescript[Math.floor(Math.random() * supportResponses.sourcescript.length)];
-            } else if (sanitized.includes('source usb') || sanitized.includes('sourceusb') || sanitized.includes('get usb') || sanitized.includes('buy usb')) {
-                return supportResponses.sourceusb[Math.floor(Math.random() * supportResponses.sourceusb.length)];
-            } else if (sanitized.includes('glitch')) {
-                return supportResponses.glitch[Math.floor(Math.random() * supportResponses.glitch.length)];
-            } else if (sanitized.includes('bug')) {
-                return supportResponses.bug[Math.floor(Math.random() * supportResponses.bug.length)];
-            } else if (sanitized.includes('click') || sanitized.includes('button') || sanitized.includes('not working')) {
-                return supportResponses.click[Math.floor(Math.random() * supportResponses.click.length)];
-            } else if (sanitized.includes('load') || sanitized.includes('slow') || sanitized.includes('freeze')) {
-                return supportResponses.loading[Math.floor(Math.random() * supportResponses.loading.length)];
-            } else if (sanitized.includes('payment') || sanitized.includes('pay') || sanitized.includes('card') || sanitized.includes('purchase')) {
-                return supportResponses.payment[Math.floor(Math.random() * supportResponses.payment.length)];
-            } else if (sanitized.includes('account') || sanitized.includes('login') || sanitized.includes('password')) {
-                return supportResponses.account[Math.floor(Math.random() * supportResponses.account.length)];
-            } else {
-                return supportResponses.default[Math.floor(Math.random() * supportResponses.default.length)];
-            }
-        }
-
-        function openTicket(productType = null) {
-            // Open Discord server
-            const discordWindow = window.open(discordServer, '_blank');
-            
-            // Show confirmation message
-            setTimeout(async () => {
-                showTyping();
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                hideTyping();
-                
-                let message = "Great! I've opened Discord for you. ";
-                
-                if (productType) {
-                    message += `Once you're in the server, look for the 🎫 ticket channel and click the button for "${productType.toUpperCase()}" to create your support ticket. Our team will assist you shortly!`;
-                } else {
-                    message += "Once you join, look for the 🎫 ticket channel and create a ticket. Our team will assist you shortly!";
-                }
-                
-                await addMessage(message, true, true);
-            }, 1000);
-        }
-        
-        // For Buy Now button - open the Discord invite directly so the app prompts to join the server
-        function handleBuyNow() {
-            const productTitle = document.getElementById('productTitle').textContent;
-
-            // Open the Discord invite (this will prompt to open/join in Discord app when available)
-            window.open(discordServer, '_blank');
-
-            // Optional: Show a confirmation in support chat if it's open
-            const supportChat = document.getElementById('supportChat');
-            if (supportChat.classList.contains('active')) {
-                setTimeout(async () => {
-                    showTyping();
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    hideTyping();
-                    await addMessage(`Perfect! I've opened Discord for your ${productTitle} purchase. Join the server and create a ticket in the 🎫 channel.`, true, true);
-                }, 500);
-            }
-        }
-
-        async function handleUserMessage() {
-            const chatInput = document.getElementById('chatInput');
-            const userMessage = chatInput.value.trim();
-            
-            if (!userMessage) return;
-            
-            if (userMessage.length > 500) {
-                addMessage("Please keep your message under 500 characters.", true, true);
-                return;
-            }
-            
-            const sanitizedMessage = sanitizeInput(userMessage);
-            addMessage(sanitizedMessage, false);
-            chatInput.value = '';
-            
-            const delay = getRandomDelay();
-            showTyping();
-            
-            await new Promise(resolve => setTimeout(resolve, delay));
-            
-            hideTyping();
-            const botResponse = getBotResponse(sanitizedMessage);
-            await addMessage(botResponse, true, true);
-        }
-
-        // Toggle sidebar
-        document.getElementById('burger').addEventListener('click', function() {
-            document.getElementById('sidebar').classList.toggle('active');
-            this.classList.toggle('active');
-        });
-
-        // Show options screen
-        document.getElementById('getNoWBtn').addEventListener('click', function() {
-            const mainScreen = document.getElementById('mainScreen');
-            const optionsScreen = document.getElementById('optionsScreen');
-            
-            mainScreen.classList.add('fade-out');
-            
-            setTimeout(() => {
-                mainScreen.style.display = 'none';
-                optionsScreen.classList.add('active');
-            }, 500);
-        });
-
-        // Back to main screen
-        document.getElementById('backToMain').addEventListener('click', function() {
-            const mainScreen = document.getElementById('mainScreen');
-            const optionsScreen = document.getElementById('optionsScreen');
-            
-            optionsScreen.classList.remove('active');
-            
-            setTimeout(() => {
-                mainScreen.style.display = 'flex';
-                mainScreen.classList.remove('fade-out');
-            }, 500);
-        });
-
-        // Show product details
-        document.querySelectorAll('.option-card').forEach(card => {
-            card.addEventListener('click', function() {
-                const productType = this.getAttribute('data-product');
-                const product = productData[productType];
-                const optionsScreen = document.getElementById('optionsScreen');
-                const detailsScreen = document.getElementById('detailsScreen');
-                
-                document.getElementById('productTitle').textContent = product.title;
-                
-                const benefitsList = document.getElementById('benefitsList');
-                benefitsList.innerHTML = '';
-                product.benefits.forEach(benefit => {
-                    const li = document.createElement('li');
-                    li.textContent = benefit;
-                    benefitsList.appendChild(li);
-                });
-                
-                optionsScreen.classList.remove('active');
-                
-                setTimeout(() => {
-                    detailsScreen.classList.add('active');
-                }, 500);
-            });
-        });
-
-        // Back to options screen
-        document.getElementById('backToOptions').addEventListener('click', function() {
-            const optionsScreen = document.getElementById('optionsScreen');
-            const detailsScreen = document.getElementById('detailsScreen');
-            
-            detailsScreen.classList.remove('active');
-            
-            setTimeout(() => {
-                optionsScreen.classList.add('active');
-            }, 500);
-        });
-
-        // Buy now redirect to Discord
-        document.getElementById('buyNowBtn').addEventListener('click', function() {
-            handleBuyNow();
-        });
-
-        // Support chat functionality
-        document.getElementById('supportLink').addEventListener('click', async function(e) {
-            e.preventDefault();
-            const supportChat = document.getElementById('supportChat');
-            const sidebar = document.getElementById('sidebar');
-            const burger = document.getElementById('burger');
-            
-            sidebar.classList.remove('active');
-            burger.classList.remove('active');
-            supportChat.classList.add('active');
-            
-            const chatMessages = document.getElementById('chatMessages');
-            if (chatMessages.children.length === 1) {
-                showTyping();
-                await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
-                hideTyping();
-                await addMessage(supportResponses.greeting[0], true, true);
-            }
-        });
-
-        // Credit modal
-        document.getElementById('creditLink').addEventListener('click', function(e) {
-            e.preventDefault();
-            const sidebar = document.getElementById('sidebar');
-            const burger = document.getElementById('burger');
-            const modal = document.getElementById('infoModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalContent = document.getElementById('modalContent');
-            
-            sidebar.classList.remove('active');
-            burger.classList.remove('active');
-            
-            modalTitle.textContent = 'Credits';
-            modalContent.innerHTML = `
-                <div class="credit-item">
-                    <span class="credit-label">Founder:</span>
-                    <span class="credit-name">♕𝕮𝖗𝖞𝖕𝖙𝖎𝖈♔</span>
-                </div>
-                <div class="credit-item">
-                    <span class="credit-label">Co-Founder:</span>
-                    <span class="credit-name">Proxyyt</span>
-                </div>
-            `;
-            
-            modal.classList.add('active');
-        });
-
-        // Info modal
-        document.getElementById('infoLink').addEventListener('click', function(e) {
-            e.preventDefault();
-            const sidebar = document.getElementById('sidebar');
-            const burger = document.getElementById('burger');
-            const modal = document.getElementById('infoModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalContent = document.getElementById('modalContent');
-            
-            sidebar.classList.remove('active');
-            burger.classList.remove('active');
-            
-            modalTitle.textContent = 'Information';
-            modalContent.innerHTML = `
-                <div class="info-section">
-                    <h3>Explanation of the Cheats</h3>
-                    <p>Welcome to Lovinja's Cheating software for Rust, this game cheat is a super modern and sophisticated cheating software. We will explain the cheats professions for the game, this software has different integrations such as Lovinja Starter, Lovinja VIP, and Lovinja Premium.</p>
-                    <p>This software contains everything to be a professional cheater; it is mostly undetectable based on how the user uses it and plays with it. The software is a great advancement to cheating industries like Rust, CS:GO, and Rainbow 6 Siege.</p>
-                </div>
-
-                <div class="divider"></div>
-
-                <div class="info-section">
-                    <h3>What the Cheat Includes</h3>
-                    <p>This cheat includes AI integrated tools to detect, predict, and subside movements based on players. The AI is an ultra fast rendering unit and is highly trained on multiple character Designs / Entities.</p>
-                    <p>The cheat is based around a GUI panel hosting all types of cheats including ESP, Aimbot, NO-recoil, Etc. This cheat bypasses EAC and can modify gameplays.</p>
-                    <p>The cheat can be sold in various different ways such as USB (super-undetectable), Online sources (super-undetectable), or via script host (semi-undetectable).</p>
-                </div>
-
-                <div class="divider"></div>
-
-                <div class="info-section">
-                    <h3>How to Get the Cheat</h3>
-                    <p>We offer various sources to our desired customers including Discord, Online sources via private DMs discord, or Gmail.</p>
-                </div>
-
-                <div class="divider"></div>
-
-                <div class="info-section">
-                    <h3>Payment Options</h3>
-                    <div class="payment-options">
-                        <span class="payment-badge">CashApp</span>
-                        <span class="payment-badge">PayPal</span>
-                        <span class="payment-badge">Apple Cash</span>
-                        <span class="payment-badge">MasterCard</span>
-                        <span class="payment-badge">Visa</span>
-                    </div>
-                </div>
-            `;
-            
-            modal.classList.add('active');
-        });
-
-        // Close info modal
-        document.getElementById('closeInfoModal').addEventListener('click', function() {
-            document.getElementById('infoModal').classList.remove('active');
-        });
-
-        // Close modal when clicking outside
-        document.getElementById('infoModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                this.classList.remove('active');
-            }
-        });
-
-        document.getElementById('closeChat').addEventListener('click', function() {
-            document.getElementById('supportChat').classList.remove('active');
-        });
-
-        document.getElementById('sendBtn').addEventListener('click', handleUserMessage);
-
-        document.getElementById('chatInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                handleUserMessage();
-            }
-        });
-
-        // Close sidebar when clicking outside
-        document.addEventListener('click', function(e) {
-            const sidebar = document.getElementById('sidebar');
-            const burger = document.getElementById('burger');
-            
-            if (!sidebar.contains(e.target) && !burger.contains(e.target) && sidebar.classList.contains('active')) {
-                sidebar.classList.remove('active');
-                burger.classList.remove('active');
-            }
-        });
-    </script>
-</body>
-</html>
+            messageDiv.className = `message ${isBot ?
